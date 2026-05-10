@@ -17,9 +17,9 @@ Muganizer combines GPT Actions, FastAPI, OpenAI, Spotify metadata enrichment, se
 - GPT Actions + FastAPI integration
 
 ## Architecture
-
+```
 Custom GPT -> GPT Actions -> FastAPI -> Muganizer Backend -> Spotify/OpenAI APIs -> Local MP3 Library
-
+```
 ## Tech Stack
 
 - Python
