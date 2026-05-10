@@ -33,9 +33,13 @@ Custom GPT -> GPT Actions -> FastAPI -> Muganizer Backend -> Spotify/OpenAI APIs
 
 ## Installation
 
-```powershell
+VS Code (Python)
+```
 python -m pip install -r requirements.txt
 python -m uvicorn muganizer_api:app --host 127.0.0.1 --port 8000 --reload
+```
+Powershell (ngrok)
+```
 ngrok http 8000
 ```
 
