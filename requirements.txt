@@ -1,0 +1,9 @@
+mutagen
+pillow
+openai
+tkinterdnd2
+requests
+python-dotenv
+fastapi
+uvicorn
+pydantic

@@ -1,0 +1,236 @@
+openapi: 3.1.0
+info:
+  title: Muganizer API
+  description: API for controlling a local Muganizer music library from a Custom GPT, including inbox-based MP3 tagging.
+  version: 1.1.0
+servers:
+  - url: https://convene-condense-mutation.ngrok-free.dev
+    description: Replace with your ngrok URL
+paths:
+  /health:
+    get:
+      operationId: healthCheck
+      summary: Check if Muganizer is running
+      responses:
+        "200":
+          description: Muganizer API health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string }
+                  muganizer_root: { type: string }
+                  inbox_root: { type: string }
+                required: [status, muganizer_root, inbox_root]
+  /inbox:
+    get:
+      operationId: listInboxFiles
+      summary: List MP3 files waiting in the Muganizer Inbox
+      responses:
+        "200":
+          description: MP3 files currently in the inbox
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/InboxFile" }
+  /tag-inbox-file:
+    post:
+      operationId: tagInboxFile
+      summary: Tag and organize one MP3 file from the Muganizer Inbox
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [filename]
+              properties:
+                filename: { type: string, description: Exact filename from the Muganizer Inbox. }
+                album: { type: string, default: Unreleased }
+                title_override: { type: string }
+                artist_override: { type: string }
+                genre_override: { type: string }
+                keep_features: { type: boolean, default: true }
+      responses:
+        "200":
+          description: Tagging result
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/TagResult" }
+  /tag-all-inbox:
+    post:
+      operationId: tagAllInboxFiles
+      summary: Tag and organize all MP3 files from the Muganizer Inbox
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                album: { type: string, default: Unreleased }
+                limit: { type: integer, default: 25 }
+      responses:
+        "200":
+          description: Tagging results
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TagResult" }
+  /search:
+    post:
+      operationId: searchLibrary
+      summary: Search the Muganizer music library semantically
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [query]
+              properties:
+                query: { type: string }
+                limit: { type: integer, default: 10 }
+      responses:
+        "200":
+          description: Matching tracks
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TrackSummary" }
+  /playlist:
+    post:
+      operationId: generatePlaylist
+      summary: Generate a playlist from a natural-language prompt
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [prompt]
+              properties:
+                prompt: { type: string }
+                limit: { type: integer, default: 15 }
+      responses:
+        "200":
+          description: Playlist path and included tracks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  playlist_path: { type: string }
+                  tracks:
+                    type: array
+                    items: { $ref: "#/components/schemas/TrackSummary" }
+                required: [playlist_path, tracks]
+  /recent:
+    get:
+      operationId: showRecentTracks
+      summary: Show recently added Muganizer tracks
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 10 }
+      responses:
+        "200":
+          description: Recent tracks
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tracks:
+                    type: array
+                    items: { $ref: "#/components/schemas/TrackSummary" }
+                required: [tracks]
+  /storage:
+    get:
+      operationId: getStorageLocations
+      summary: Get Muganizer storage folder locations
+      responses:
+        "200":
+          description: Storage paths
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  muganizer_root: { type: string }
+                  inbox_root: { type: string }
+                  local_files_root: { type: string }
+                  album_covers_root: { type: string }
+                  artist_covers_root: { type: string }
+                  playlists_root: { type: string }
+                  database_file: { type: string }
+                  log_file: { type: string }
+                required: [muganizer_root, inbox_root, local_files_root, album_covers_root, artist_covers_root, playlists_root, database_file, log_file]
+  /open-folder:
+    post:
+      operationId: openMuganizerFolder
+      summary: Open the Muganizer folder on the local computer
+      responses:
+        "200":
+          description: Folder open result
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  opened: { type: boolean }
+                  path: { type: string }
+                  message: { type: string }
+                required: [opened, path, message]
+  /tracks:
+    get:
+      operationId: listTracks
+      summary: List tracks in the Muganizer library
+      parameters:
+        - name: limit
+          in: query
+          required: false
+          schema: { type: integer, default: 50 }
+      responses:
+        "200":
+          description: Tracks
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: "#/components/schemas/TrackSummary" }
+components:
+  schemas:
+    InboxFile:
+      type: object
+      properties:
+        filename: { type: string }
+        path: { type: string }
+        size_bytes: { type: integer }
+      required: [filename, path, size_bytes]
+    TrackSummary:
+      type: object
+      properties:
+        title: { type: string }
+        artist: { type: string }
+        album: { type: string }
+        genre: { type: string }
+        mood_tags: { type: string }
+        description: { type: string }
+        file_path: { type: string }
+        score: { type: number }
+      required: [title, artist]
+    TagResult:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        original_filename: { type: string }
+        final_path: { type: string }
+        metadata: { $ref: "#/components/schemas/TrackSummary" }
+      required: [success, message, original_filename]
