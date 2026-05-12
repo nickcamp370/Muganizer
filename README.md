@@ -193,7 +193,8 @@ Connect Custom GPT
 2. Add Actions
 3. Paste the OpenAPI schema
 4. Replace the schema URL with your ngrok URL
-5. Save the GPT
+5. Insert the "Muganizer GPT Instructions" into the Instructions
+6. Save the GPT
 
 ## Example Workflow
 ```
